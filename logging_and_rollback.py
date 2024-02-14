@@ -48,7 +48,7 @@ def recovery_script(log:list):
     print("Recovery in process ...\n")
 
     global data_base
-    for entry, index in log:
+    for index, entry in enumerate(log):
         #Find the failed entry
         if entry[log_status_index] == 'FAILED':
             #Rollback the failed transaction

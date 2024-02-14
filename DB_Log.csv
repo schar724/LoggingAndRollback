@@ -1,2 +1,3 @@
-1,table,Department,"['1', 'John', 'Lennon', '230000', 'Projects', 'Married']","['1', 'John', 'Lennon', '230000', 'Music', 'Married']",COMMITTED,2024-02-13T23:22:58.818969,user_id
-2,table,Civil_status,"['5', 'Rachel', 'Sturgeon', '197000', 'Engineering', 'Married']","['5', 'Rachel', 'Sturgeon', '197000', 'Engineering', 'Divorced']",ROLLEDBACK,2024-02-13T23:22:58.821684,user_id
+1,table,Department,"['1', 'John', 'Lennon', '230000', 'Projects', 'Married']","['1', 'John', 'Lennon', '230000', 'Music', 'Married']",COMMITTED,2024-02-13T23:47:34.519710,user_id
+2,table,Civil_status,"['5', 'Rachel', 'Sturgeon', '197000', 'Engineering', 'Married']","['5', 'Rachel', 'Sturgeon', '197000', 'Engineering', 'Divorced']",COMMITTED,2024-02-13T23:47:34.521541,user_id
+3,table,Salary,"['15', 'Ryuichi', 'Sakamoto', '321000', 'Processing Facilities', 'Single']","['15', 'Ryuichi', 'Sakamoto', '200000', 'Processing Facilities', 'Single']",COMMITTED,2024-02-13T23:47:34.521917,user_id
