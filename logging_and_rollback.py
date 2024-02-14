@@ -3,6 +3,7 @@
 import random
 import copy
 import csv
+import datetime
 
 data_base = []  # Global binding for the Database contents
 '''
@@ -13,6 +14,8 @@ transactions = [['1', 'Department', 'Music'], ['5', 'Civil_status', 'Divorced'],
                 ['15', 'Salary', '200000']]
 DB_Log = [] # <-- You WILL populate this as you go
 
+
+## Global Variables
 transaction_num = 0
 
 transaction_id_index = 0
@@ -30,7 +33,7 @@ log_user_id_index = 7
 
 header_index = 0
 
-def recovery_script(log:list):  #<--- Your CODE
+def recovery_script(log:list): 
     '''
     Restore the database to stable and sound condition, by processing the DB log.
     '''
@@ -41,17 +44,18 @@ def recovery_script(log:list):  #<--- Your CODE
     for entry in log:
         #Find the failed entry
         if entry[log_status_index] == 'FAILED':
-            print('rolling back transaction...', entry )
             before_image = entry[log_before_image_index]
             instance_id = int(before_image[log_transaction_id_index])
             data_base[instance_id] = before_image
-            entry[log_status_index] = 'ROLLEDBACK'
+            if(export_to_csv()):
+                entry[log_status_index] = 'ROLLEDBACK'
+
             break
 
-    export_to_csv()
+    
     print("Recovery completed.\n")
 
-def transaction_processing(index:int): #<-- Your CODE
+def transaction_processing(index:int):
     '''
     1. Process transaction in the transaction queue.
     2. Updates DB_Log accordingly
@@ -59,21 +63,20 @@ def transaction_processing(index:int): #<-- Your CODE
     '''
 
     log_entry = create_log_entry(index)
-    print('new log entry: ', log_entry)
     DB_Log.append(log_entry)
     process_transaction(index)
 
-### Helper Functions ###
+## Helper Functions 
 
 def create_log_entry(transaction_id:int)->list:
     '''
-    log_entry = [[transaction_id, table, attribute, before_image, after_image, status, timestamp, user_id], ... ]
+    log_entry = [transaction_id, table, attribute, before_image, after_image, status, timestamp, user_id]
     '''
     global data_base
     instance_id, attribute, value, attribute_index = unpack_transaction(transaction_id)
     before_instance = copy.deepcopy(data_base[instance_id])
 
-    return [transaction_id + 1, 'table', attribute, before_instance, get_updated_instance(before_instance, attribute_index, value), 'PENDING', get_time_stamp(), 'user_id']
+    return [transaction_id + 1, 'table', attribute, before_instance, get_updated_instance(before_instance, attribute_index, value), 'PENDING', datetime.datetime.now().isoformat(), 'user_id']
 
 def get_transaction_id()->str:
     global transaction_num
@@ -122,10 +125,15 @@ def unpack_transaction(index:int)->object:
     return instance_id, attribute, value, attribute_index
     
 def export_to_csv():
-    with open('./Employees_DB_ADV_After.csv', 'w') as file:
-        writer = csv.writer(file)
-        for row in data_base:
-            writer.writerow(row)
+    try:
+        with open('./Employees_DB_ADV_After.csv', 'w') as file:
+            writer = csv.writer(file)
+            for row in data_base:
+                writer.writerow(row)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+    return True
 
 def export_DB_Log():
     with open('./DB_Log.csv', 'w') as file:
@@ -192,8 +200,9 @@ def main():
                 print(f'There was a failure whilst processing transaction No. {failing_transaction_index}.')
                 break
             else:
-                export_to_csv()
-                update_DB_log("COMMITTED",index)
+                if(export_to_csv()):
+                    update_DB_log("COMMITTED",index)
+                    
                 print(f'Transaction No. {index+1} has been commited! Changes are permanent.')
         break
         
@@ -217,8 +226,6 @@ def main():
     for item in DB_Log:
         print(item)
 
-    
-    
 main()
 
 
