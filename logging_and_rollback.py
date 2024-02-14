@@ -147,25 +147,29 @@ def read_file(file_name:str)->list:
     '''
     Read the contents of a CSV file line-by-line and return a list of lists
     '''
-    data = []
-    #
-    # one line at-a-time reading file
-    #
-    with open(file_name, 'r') as reader:
-    # Read and print the entire file line by line
-        line = reader.readline()
-        while line != '':  # The EOF char is an empty string
-            line = line.strip().split(',')
-            data.append(line)
-             # get the next line
+    try: 
+        data = []
+        #
+        # one line at-a-time reading file
+        #
+        with open(file_name, 'r') as reader:
+        # Read and print the entire file line by line
             line = reader.readline()
+            while line != '':  # The EOF char is an empty string
+                line = line.strip().split(',')
+                data.append(line)
+                # get the next line
+                line = reader.readline()
 
-    size = len(data)
-    print('The data entries BEFORE updates are presented below:')
-    for item in data:
-        print(item)
-    print(f"\nThere are {size} records in the database, including one header.\n")
-    return data
+        size = len(data)
+        print('The data entries BEFORE updates are presented below:')
+        for item in data:
+            print(item)
+        print(f"\nThere are {size} records in the database, including one header.\n")
+        return data
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
 
 def is_there_a_failure()->bool:
     '''
