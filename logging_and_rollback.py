@@ -39,6 +39,7 @@ def recovery_script(log:list):  #<--- Your CODE
 
     global data_base
     for entry in log:
+        #Find the failed entry
         if entry[log_status_index] == 'FAILED':
             print('rolling back transaction...', entry )
             before_image = entry[log_before_image_index]
@@ -177,12 +178,10 @@ def main():
     
     failure = False
     failing_transaction_index = None
-    print('DB LOG BEFORE ', DB_Log)
     while not failure:
         # Process transaction
         for index in range(number_of_transactions):
             transaction_processing(index)
-            print('DB LOG DURING ', DB_Log)
             print(f"\nProcessing transaction No. {index+1}.")    #<--- Your CODE (Call function transaction_processing)
             print("UPDATES have not been committed yet...\n")
             failure = is_there_a_failure()
@@ -190,13 +189,11 @@ def main():
                 must_recover = True
                 failing_transaction_index = index + 1
                 update_DB_log('FAILED', index)
-                print('DB LOG AFTER FAILURE', DB_Log)
                 print(f'There was a failure whilst processing transaction No. {failing_transaction_index}.')
                 break
             else:
                 export_to_csv()
                 update_DB_log("COMMITTED",index)
-                print('DB LOG AFTER SUCCESS ', DB_Log)
                 print(f'Transaction No. {index+1} has been commited! Changes are permanent.')
         break
         
