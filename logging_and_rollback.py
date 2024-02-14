@@ -1,4 +1,11 @@
-# Adv DB Winter 2024 - 1
+# Assignment 1: Logging and Rollback
+# COMP 4522-001, Winter 2024
+# Author: Scott Charles
+# Date: 02-14-2024
+
+'''
+This is a simulation of a database system that processes transactions and keeps a record of logs.
+'''
 
 import random
 import copy
@@ -12,7 +19,7 @@ transactions = [['id1',' attribute2', 'value1'], ['id2',' attribute2', 'value2']
 '''
 transactions = [['1', 'Department', 'Music'], ['5', 'Civil_status', 'Divorced'],
                 ['15', 'Salary', '200000']]
-DB_Log = [] # <-- You WILL populate this as you go
+DB_Log = [] 
 
 
 ## Global Variables
@@ -41,27 +48,25 @@ def recovery_script(log:list):
     print("Recovery in process ...\n")
 
     global data_base
-    for entry in log:
+    for entry, index in log:
         #Find the failed entry
         if entry[log_status_index] == 'FAILED':
+            #Rollback the failed transaction
             before_image = entry[log_before_image_index]
             instance_id = int(before_image[log_transaction_id_index])
             data_base[instance_id] = before_image
             if(export_to_csv()):
-                entry[log_status_index] = 'ROLLEDBACK'
-
+                update_DB_log('ROLLEDBACK', index)
             break
 
-    
     print("Recovery completed.\n")
 
 def transaction_processing(index:int):
     '''
-    1. Process transaction in the transaction queue.
-    2. Updates DB_Log accordingly
-    3. This function does NOT commit the updates, just execute them
+    1. Create a log entry
+    2. Append it to the log list
+    3. Process the transaction
     '''
-
     log_entry = create_log_entry(index)
     DB_Log.append(log_entry)
     process_transaction(index)
@@ -75,8 +80,10 @@ def create_log_entry(transaction_id:int)->list:
     global data_base
     instance_id, attribute, value, attribute_index = unpack_transaction(transaction_id)
     before_instance = copy.deepcopy(data_base[instance_id])
+    return [transaction_id + 1, 'table', attribute, before_instance, get_updated_instance(before_instance, attribute_index, value), 'PENDING', get_time_stamp(), 'user_id']
 
-    return [transaction_id + 1, 'table', attribute, before_instance, get_updated_instance(before_instance, attribute_index, value), 'PENDING', datetime.datetime.now().isoformat(), 'user_id']
+def get_time_stamp()->str:
+    return datetime.datetime.now().isoformat()
 
 def get_transaction_id()->str:
     global transaction_num
@@ -87,12 +94,6 @@ def get_updated_instance(instance:list, attribute_index:int, value:str)->list:
     updated_instance = copy.deepcopy(instance)
     updated_instance[attribute_index] = value
     return updated_instance
-
-def get_time_stamp()->str:
-    '''
-    Return a placeholder for the time stamp
-    '''
-    return '2024-01-01 12:00:00'
 
 def process_transaction(index:int): 
     '''
@@ -109,19 +110,18 @@ def update_data_base(instance_id:int, attribute_index:int, value:str):
 def update_DB_log(status:str, index:int):
     global DB_Log
     DB_Log[index][log_status_index] = status
+    DB_Log[index][log_timestamp_index] = get_time_stamp()
 
 def unpack_transaction(index:int)->object:
     '''
     Unpack all transaction information used in a log entry and database update
     '''
     global data_base
-
     transaction = transactions[index]
     instance_id = int(transaction[transaction_id_index])
     attribute = transaction[transaction_attribute_index]
     attribute_index = data_base[header_index].index(attribute)
     value = transaction[transaction_value_index]
-
     return instance_id, attribute, value, attribute_index
     
 def export_to_csv():
@@ -205,12 +205,10 @@ def main():
                 break
             else:
                 if(export_to_csv()):
-                    update_DB_log("COMMITTED",index)
-                    
+                    update_DB_log("COMMITTED",index) 
                 print(f'Transaction No. {index+1} has been commited! Changes are permanent.')
         break
-        
-       
+
     if must_recover:
         #Call your recovery script
         recovery_script(DB_Log) ### Call the recovery function to restore DB to sound state
